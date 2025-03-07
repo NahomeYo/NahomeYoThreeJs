@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="/stylesheet.css" />
+    <title>Nahome Yohannes</title>
+</head>
+
+<body>
+    <div id="screen">
+    </div>
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+
+    <script type="importmap">
+        {
+            "imports": 
+            {
+                "three": "https://unpkg.com/three@0.139.2/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { init } from './main.js';
+        init();
+    </script>
+    <script src="https://unpkg.com/three@0.139.2/examples/jsm/loaders/DRACOLoader.js"></script>
+    <script src="//cdn.rawgit.com/mrdoob/three.js/45418089bd5633e856384a8c0beefced87143334/build/three.min.js"></script>
+    <script
+        src="//cdn.rawgit.com/mrdoob/three.js/45418089bd5633e856384a8c0beefced87143334/examples/js/controls/OrbitControls.js"></script>
+    <script
+        src="//cdn.rawgit.com/mrdoob/three.js/45418089bd5633e856384a8c0beefced87143334/examples/js/loaders/GLTFLoader.js"></script>
+    <script
+        src="//cdn.rawgit.com/mrdoob/three.js/45418089bd5633e856384a8c0beefced87143334/examples\js\shaders\CopyShader.js"></script>
+    <script
+        src="//cdn.rawgit.com/mrdoob/three.js/45418089bd5633e856384a8c0beefced87143334/examples/js/postprocessing/EffectComposer.js"></script>
+    <script
+        src="//cdn.rawgit.com/mrdoob/three.js/45418089bd5633e856384a8c0beefced87143334/examples/js/postprocessing/RenderPass.js"></script>
+    <script
+        src="//cdn.rawgit.com/mrdoob/three.js/45418089bd5633e856384a8c0beefced87143334/examples/js/postprocessing/ShaderPass.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+* {
+    overflow-x: hidden;
+}
+
+body {
+    overflow: hidden;
+    margin: 0;
+    background: #BC6654;
+    overflow-y: visible;
+}
+
+#screen {
+    z-index: 999;
+    position: absolute;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    overflow-y: hidden;
+}
