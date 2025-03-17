@@ -1,17 +1,13 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'https://unpkg.com/three@0.139.2/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'https://unpkg.com/three@0.139.2/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'https://unpkg.com/three@0.139.2/examples/jsm/loaders/DRACOLoader.js';
-import { RGBELoader } from 'https://unpkg.com/three@0.136.0/examples/jsm/loaders/RGBELoader.js';
 
 // Global variables
-let renderer, scene, camera, controls, model, mixer, width, height, sceneContainer;
+let renderer, scene, camera, controls, width, height, sceneContainer;
+let model;
+let nahomeMixer, catMixer, ccMixer, ccAppsMixer, vsMixer, vsAppsMixer;
 
-let forward, backward, right, left, space, down = false
-let movKey = false;
-let walkingAction, idleAction;
-let moveSpeed = 0.025;
 const clock = new THREE.Clock();
+controls = new OrbitControls(camera, container);
 
 sceneContainer = document.getElementById('screen');
 width = sceneContainer.clientWidth;
@@ -27,6 +23,16 @@ function createRenderer() {
     renderer.setAnimationLoop(render);
     sceneContainer.appendChild(renderer.domElement);
 
+    window.addEventListener('resize', () => {
+        width = sceneContainer.clientWidth;
+        height = sceneContainer.clientHeight;
+
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(width, height);
+    })
+
     function render() {
         renderer.render(scene, camera);
     }
@@ -34,15 +40,13 @@ function createRenderer() {
 
 // CAMERA
 function createCamera() {
-    const FOV = 50;
+    const FOV = 60.34;
     const aspect = width / height;
-    const near = 0.5;
-    const far = 1000;
+    const near = 0.1;
+    const far = 2000.00;
 
     camera = new THREE.PerspectiveCamera(FOV, aspect, near, far);
-    camera.position.set(0, 5, 10);
-
-    controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(-0.580, 1.420, -1.000);
 }
 
 // MODELS
@@ -58,112 +62,92 @@ function addModel(scene) {
         model.position.set(0, 0, 0);
         model.scale.set(0.75, 0.75, 0.75);
         model.castShadow = true;
-
-        mixer = new THREE.AnimationMixer(model);
-        walkingAction = mixer.clipAction(gltf.animations[0]);
-        idleAction = mixer.clipAction(gltf.animations[1]);
-        const flyingAction = mixer.clipAction(gltf.animations[2]);
-        const jumpAction = mixer.clipAction(gltf.animations[3]);
-        const landAction = mixer.clipAction(gltf.animations[4]);
-        const shootAction = mixer.clipAction(gltf.animations[5]);
-
-        idleAction.play();
-        walkingAction.play();
-        flyingAction.play();
-        jumpAction.play();
-        landAction.play();
-        shootAction.play();
-
-        idleAction.enabled = true;
-        walkingAction.enabled = false;
-        flyingAction.enabled = false;
-        jumpAction.enabled = false;
-        landAction.enabled = false;
-        shootAction.enabled = false;
-
         scene.add(model);
+
+        nahomeMixer = new THREE.AnimationMixer(model);
+        let walkAction = nahomeMixer.clipAction(THREE.AnimationClip.findByName(gltf.animations, 'walking'));
+        let idleAction = nahomeMixer.clipAction(THREE.AnimationClip.findByName(gltf.animations, 'idle'));
+        let flyingAction = nahomeMixer.clipAction(THREE.AnimationClip.findByName(gltf.animations, 'flying'));
+        let jumpingAction = nahomeMixer.clipAction(THREE.AnimationClip.findByName(gltf.animations, 'jumping'));
+        let landingAction = nahomeMixer.clipAction(THREE.AnimationClip.findByName(gltf.animations, 'landing'));
+
+        walkAction.play();
     })
 
     loader.load("./models/land.glb", function (gltf) {
-        const root = gltf.scene;
+        let root = gltf.scene;
         root.castShadow = true;
 
-        const screen01 = root.getObjectByName('')
         scene.add(root);
     });
 
     loader.load("./models/creativeCloud.glb", function (gltf) {
-        const root = gltf.scene;
-
-        mixer = new THREE.AnimationMixer(root);
-        const rotateFloat = mixer.clipAction(gltf.animations[0]);
-
-        rotateFloat.play();
-        rotateFloat.enabled = true;
-
+        let root = gltf.scene;
         scene.add(root);
+
+        ccMixer = new THREE.AnimationMixer(root);
+        const clips = gltf.animations;
+
+        const clip001 = THREE.AnimationClip.findByName(clips, 'adobeFloat');
+        const floatAction = ccMixer.clipAction(clip001);
+        floatAction.play();
     });
 
     loader.load("./models/creativeCloudAppsRotate.glb", function (gltf) {
-        const root = gltf.scene;
+        let root = gltf.scene;
         root.castShadow = true;
         scene.add(root);
 
-        mixer = new THREE.AnimationMixer(root);
-        const rotateFloat = mixer.clipAction(gltf.animations[0]);
+        ccAppsMixer = new THREE.AnimationMixer(root);
+        const clips = gltf.animations;
 
-        rotateFloat.play();
-        rotateFloat.enabled = true;
-
-        scene.add(root);
+        const clip001 = THREE.AnimationClip.findByName(clips, 'CCrotateAction');
+        const rotateAction = ccAppsMixer.clipAction(clip001);
+        rotateAction.play();
     });
 
     loader.load("./models/githubOctoCat.glb", function (gltf) {
-        const root = gltf.scene;
+        let root = gltf.scene;
         root.castShadow = true;
-
-        const mixer = new THREE.AnimationMixer( root );
-        const clips = gltf.animations;
-        
-        const clip = THREE.AnimationClip.findByName( clips, 'catRotate' );
-
-        const action = mixer.clipAction( clip );
-        action.play();
-        
-        clips.forEach( function ( clip ) {
-            mixer.clipAction( clip ).play();
-        } );
-
         scene.add(root);
 
+        catMixer = new THREE.AnimationMixer(root);
+        const clips = gltf.animations;
+
+        const clip001 = THREE.AnimationClip.findByName(clips, 'catRotate');
+        const clip002 = THREE.AnimationClip.findByName(clips, 'floatAnim');
+        const clip003 = THREE.AnimationClip.findByName(clips, 'tailsAnim');
+        const clip004 = THREE.AnimationClip.findByName(clips, 'tailWiggle');
+
+        clips.forEach((clip) => {
+            catMixer.clipAction(clip).play();
+        })
     });
 
     loader.load("./models/vsLanguagesRotate.glb", function (gltf) {
-        const root = gltf.scene;
+        let root = gltf.scene;
         root.castShadow = true;
         scene.add(root);
 
-        mixer = new THREE.AnimationMixer(root);
-        const rotateFloat = mixer.clipAction(gltf.animations[0]);
+        vsAppsMixer = new THREE.AnimationMixer(root);
+        const clips = gltf.animations;
 
-        rotateFloat.play();
-        rotateFloat.enabled = true;
-
-        scene.add(root);
+        const clip001 = THREE.AnimationClip.findByName(clips, 'VSrotateAction');
+        const rotateAction = vsAppsMixer.clipAction(clip001);
+        rotateAction.play();
     });
 
     loader.load("./models/visualStudioIcon.glb", function (gltf) {
-        const root = gltf.scene;
+        let root = gltf.scene;
         root.castShadow = true;
         scene.add(root);
 
-        mixer = new THREE.AnimationMixer(root);
-        const rotateFloat = mixer.clipAction(gltf.animations[0]);
+        vsMixer = new THREE.AnimationMixer(root);
+        const clips = gltf.animations;
 
-        rotateFloat.play();
-        rotateFloat.enabled = true;
-
-        scene.add(root);
+        const clip001 = THREE.AnimationClip.findByName(clips, 'VSFloat');
+        const floatAction = vsMixer.clipAction(clip001);
+        floatAction.play();
     });
 }
 
@@ -184,24 +168,34 @@ function addLights(scene) {
 }
 
 // ANIMATE
-function animate() {
-    requestAnimationFrame(animate);
-    mixer.update(clock.getDelta());
-    controls.update();
-    renderer.render(scene, camera);
-}
-
 export function init() {
     scene = new THREE.Scene();
-    var loader = new THREE.TextureLoader();
-    var texture = loader.load('./textures/trees.svg');
-    scene.background = new THREE.MeshBasicMaterial({map: texture});
-    scene.fog = new THREE.Fog(0x6c9696, 90, 100);
+    scene.background = new THREE.Color(0x6c9696);
+    controls = new OrbitControls(camera, container);
 
+    width = sceneContainer.clientWidth;
+    height = sceneContainer.clientHeight;
+    scene.fog = new THREE.Fog(0x6c9696, 90, 100);
 
     createRenderer();
     createCamera();
     addModel(scene);
     addLights(scene);
     animate();
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        const delta = clock.getDelta();
+        const time = clock.getElapsedTime();
+
+        if (nahomeMixer) nahomeMixer.update(delta);
+        if (catMixer) catMixer.update(delta);
+        if (ccMixer) ccMixer.update(delta);
+        if (ccAppsMixer) ccAppsMixer.update(delta);
+        if (vsMixer) vsMixer.update(delta);
+        if (vsAppsMixer) vsAppsMixer.update(delta);
+
+        renderer.render(scene, camera);
+    }
 }
